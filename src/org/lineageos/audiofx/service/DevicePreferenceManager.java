@@ -223,7 +223,7 @@ public class DevicePreferenceManager
         // bass boost: 15%  virtualizer: 20%  preset: FLAT
         int flat = findInList(getNonLocalizedString(R.string.flat), presetNames);
         prefsFor(DEVICE_HEADSET).edit()
-                .putBoolean(DEVICE_AUDIOFX_GLOBAL_ENABLE, true)
+                .putBoolean(DEVICE_AUDIOFX_GLOBAL_ENABLE, false)
                 .putBoolean(DEVICE_AUDIOFX_BASS_ENABLE, true)
                 .putString(DEVICE_AUDIOFX_BASS_STRENGTH, "150")
                 .putBoolean(DEVICE_AUDIOFX_VIRTUALIZER_ENABLE, true)
@@ -253,7 +253,7 @@ public class DevicePreferenceManager
         int idx = findInList(smallSpeakers, presetNames);
         if (idx >= 0) {
             speakerPrefs.edit()
-                    .putBoolean(DEVICE_AUDIOFX_GLOBAL_ENABLE, true)
+                    .putBoolean(DEVICE_AUDIOFX_GLOBAL_ENABLE, false)
                     .putString(DEVICE_AUDIOFX_EQ_PRESET, String.valueOf(idx))
                     .apply();
         }
