@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "be595d08_1376bc80",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-06T20:32:50Z",
+      "side": 1,
+      "message": "I was thinking we could add a shortcut to Eleven, and perhaps Settings (with some summary)\n\nRight now this is very confusing for our users, given it\u0027s the first many of them are seeing it and it isn\u0027t working for all audio (they don\u0027t know why!)",
+      "revId": "56099566ffa714ed39486c47c6cd4456e1f6b67d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
