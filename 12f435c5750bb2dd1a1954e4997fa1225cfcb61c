@@ -16,6 +16,24 @@
       "message": "Is this also for ASfP?",
       "revId": "12f435c5750bb2dd1a1954e4997fa1225cfcb61c",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "81fe7e18_26020cae",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2024-10-15T16:55:22Z",
+      "side": 1,
+      "message": "That\u0027s how I detected the issue but it is necessary since a few target APIs to declare the exported tag on various elements",
+      "parentUuid": "cf06f080_c5a0ebba",
+      "revId": "12f435c5750bb2dd1a1954e4997fa1225cfcb61c",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
