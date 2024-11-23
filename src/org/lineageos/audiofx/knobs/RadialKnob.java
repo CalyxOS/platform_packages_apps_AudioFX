@@ -1,32 +1,10 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Copyright (c) 2015, The CyanogenMod Project. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *       * Redistributions in binary form must reproduce the above
- *         copyright notice, this list of conditions and the following
- *         disclaimer in the documentation and/or other materials provided
- *         with the distribution.
- *       * Neither the name of The Linux Foundation nor the names of its
- *         contributors may be used to endorse or promote products derived
- *         from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-FileCopyrightText: 2013 The Linux Foundation
+ * SPDX-FileCopyrightText: 2015-2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: BSD-3-Clause
  */
+
 package org.lineageos.audiofx.knobs;
 
 import android.animation.Animator;
@@ -36,8 +14,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Vibrator;
@@ -47,6 +23,8 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+
+import androidx.annotation.NonNull;
 
 import org.lineageos.audiofx.R;
 
@@ -91,13 +69,8 @@ public class RadialKnob extends View {
     private final int mBackgroundArcColorDisabled;
     private final int mRectPadding;
     private final int mStrokeWidth;
-    private final float mHandleWidth; // little square indicator where user touches
     private final float mTextOffset;
 
-    Path mPath = new Path();
-    PathMeasure mPathMeasure = new PathMeasure();
-    float[] mTmp = new float[2];
-    float mStartX, mStopX, mStartY, mStopY;
     private Context mContext;
 
     public RadialKnob(Context context, AttributeSet attrs, int defStyle) {
@@ -120,15 +93,11 @@ public class RadialKnob extends View {
         mTextOffset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2,
                 getResources().getDisplayMetrics());
 
-        mHandleWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5,
-                getResources().getDisplayMetrics());
-
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(mHighlightColor);
         mPaint.setStrokeWidth(mStrokeWidth = res.getDimensionPixelSize(R.dimen.radial_knob_stroke));
-        mPaint.setStrokeCap(Paint.Cap.BUTT);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setShadowLayer(2, 1, -2, getResources().getColor(R.color.black));
 
         setScaleX(REGULAR_SCALE);
         setScaleY(REGULAR_SCALE);
@@ -212,7 +181,7 @@ public class RadialKnob extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         mPaint.setStrokeWidth(mStrokeWidth);
@@ -225,31 +194,6 @@ public class RadialKnob extends View {
             mPaint.setColor(mHighlightColor);
             canvas.drawArc(mRectF, START_ANGLE, sweepAngle, false, mPaint);
         }
-
-        final float indicatorSweepAngle = Math.max(1f, sweepAngle);
-
-        // render the indicator
-        mPath.reset();
-        mPath.arcTo(mInnerRect, START_ANGLE, indicatorSweepAngle, true);
-
-        mPathMeasure.setPath(mPath, false);
-        mPathMeasure.getPosTan(mPathMeasure.getLength(), mTmp, null);
-
-        mStartX = mTmp[0];
-        mStartY = mTmp[1];
-
-        mPath.reset();
-        mPath.arcTo(mOuterRect, START_ANGLE, indicatorSweepAngle, true);
-
-        mPathMeasure.setPath(mPath, false);
-        mPathMeasure.getPosTan(mPathMeasure.getLength(), mTmp, null);
-
-        mStopX = mTmp[0];
-        mStopY = mTmp[1];
-
-        mPaint.setStrokeWidth(mHandleWidth);
-        mPaint.setColor(Color.WHITE);
-        canvas.drawLine(mStartX, mStartY, mStopX, mStopY, mPaint);
 
         canvas.drawText(getProgressText(),
                 mOuterRect.centerX(),
@@ -269,8 +213,7 @@ public class RadialKnob extends View {
     protected void onSizeChanged(int w, int h, int oldW, int oldH) {
         super.onSizeChanged(w, h, oldW, oldH);
 
-        int size = w > h ? h : w;
-        mWidth = size;
+        mWidth = Math.min(w, h);
         int diff;
         if (w > h) {
             diff = (w - h) / 2;
@@ -301,45 +244,42 @@ public class RadialKnob extends View {
         mAnimator.setInterpolator(new AccelerateInterpolator());
         mAnimator.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animator animation) {
+            public void onAnimationStart(@NonNull Animator animation) {
                 mAnimating = true;
             }
 
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(@NonNull Animator animation) {
                 mAnimating = false;
                 postInvalidate();
             }
 
             @Override
-            public void onAnimationCancel(Animator animation) {
+            public void onAnimationCancel(@NonNull Animator animation) {
                 mAnimating = false;
                 postInvalidate();
             }
 
             @Override
-            public void onAnimationRepeat(Animator animation) {
+            public void onAnimationRepeat(@NonNull Animator animation) {
 
             }
         });
-        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float progress = (Float) animation.getAnimatedValue();
-                mProgress = progress;
-                mLastAngle = mProgress * MAX_DEGREES;
-                if (DEBUG) {
-                    Log.i(TAG, "onAnimationUpdate(): mProgress: "
-                            + mProgress + ", mLastAngle: " + mLastAngle);
-                }
-
-                setProgress(mProgress);
-                if (mOnKnobChangeListener != null) {
-                    mOnKnobChangeListener.onValueChanged(RadialKnob.this,
-                            (int) (progress * mMax), true);
-                }
-                postInvalidate();
+        mAnimator.addUpdateListener(animation -> {
+            float progress1 = (Float) animation.getAnimatedValue();
+            mProgress = progress1;
+            mLastAngle = mProgress * MAX_DEGREES;
+            if (DEBUG) {
+                Log.i(TAG, "onAnimationUpdate(): mProgress: "
+                        + mProgress + ", mLastAngle: " + mLastAngle);
             }
+
+            setProgress(mProgress);
+            if (mOnKnobChangeListener != null) {
+                mOnKnobChangeListener.onValueChanged(RadialKnob.this,
+                        (int) (progress1 * mMax), true);
+            }
+            postInvalidate();
         });
         mAnimator.start();
     }

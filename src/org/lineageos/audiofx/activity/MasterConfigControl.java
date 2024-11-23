@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.activity;
 
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
@@ -270,10 +261,9 @@ public class MasterConfigControl {
             if (filter.length == 0) {
                 devices.add(ai);
             } else {
-                for (int i = 0; i < filter.length; i++) {
-                    if (ai.getType() == filter[i]) {
+                for (int j : filter) {
+                    if (ai.getType() == j) {
                         devices.add(ai);
-                        continue;
                     }
                 }
             }
@@ -289,14 +279,6 @@ public class MasterConfigControl {
         return mContext.getSharedPreferences(getCurrentDeviceIdentifier(), 0);
     }
 
-    public boolean hasDts() {
-        return getGlobalPrefs().getBoolean(Constants.AUDIOFX_GLOBAL_HAS_DTS, false);
-    }
-
-    public boolean hasMaxxAudio() {
-        return getGlobalPrefs().getBoolean(Constants.AUDIOFX_GLOBAL_HAS_MAXXAUDIO, false);
-    }
-
     public boolean hasBassBoost() {
         return getGlobalPrefs().getBoolean(Constants.AUDIOFX_GLOBAL_HAS_BASSBOOST, false);
     }
@@ -309,17 +291,8 @@ public class MasterConfigControl {
         return getGlobalPrefs().getBoolean(Constants.AUDIOFX_GLOBAL_HAS_VIRTUALIZER, false);
     }
 
-    public boolean getMaxxVolumeEnabled() {
-        return getPrefs().getBoolean(Constants.DEVICE_AUDIOFX_MAXXVOLUME_ENABLE, false);
-    }
-
     public boolean getReverbEnabled() {
         return getPrefs().getString(Constants.DEVICE_AUDIOFX_REVERB_PRESET, "0").equals("1");
-    }
-
-    public void setMaxxVolumeEnabled(boolean enable) {
-        getPrefs().edit().putBoolean(Constants.DEVICE_AUDIOFX_MAXXVOLUME_ENABLE, enable).apply();
-        updateService(AudioFxService.VOLUME_BOOST_CHANGED);
     }
 
     public void setReverbEnabled(boolean enable) {
@@ -366,7 +339,7 @@ public class MasterConfigControl {
 
     private static String appendDeviceAddress(AudioDeviceInfo info, String prefix) {
         StringBuilder nm = new StringBuilder(prefix);
-        if (info != null && info.getAddress() != null) {
+        if (info != null) {
             nm.append("-").append(info.getAddress().replace(":", ""));
         }
         return nm.toString();
@@ -398,8 +371,6 @@ public class MasterConfigControl {
 
     /**
      * Set whether to automatically attempt to bind to the service.
-     *
-     * @param bindToService
      */
     public void setAutoBindToService(boolean bindToService) {
         mShouldBindToService = bindToService;

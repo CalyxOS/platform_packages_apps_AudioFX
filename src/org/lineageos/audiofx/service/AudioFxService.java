@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2014-2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2014-2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.service;
 
 import android.app.Service;
@@ -54,7 +45,6 @@ public class AudioFxService extends Service
     public static final int EQ_CHANGED = 0x1;
     public static final int BASS_BOOST_CHANGED = 0x2;
     public static final int VIRTUALIZER_CHANGED = 0x4;
-    public static final int TREBLE_BOOST_CHANGED = 0x8;
     public static final int VOLUME_BOOST_CHANGED = 0x10;
     public static final int REVERB_CHANGED = 0x20;
     public static final int ALL_CHANGED = 0xFF;
@@ -192,15 +182,16 @@ public class AudioFxService extends Service
             case TRIM_MEMORY_RUNNING_MODERATE:
             case TRIM_MEMORY_COMPLETE:
                 if (DEBUG) Log.d(TAG, "killing service if no effects active.");
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!mSessionManager.hasActiveSessions()) {
-                            stopSelf();
-                            Log.w(TAG, "self destructing, no sessions active and nothing to do.");
-                        }
+                mHandler.postDelayed(() -> {
+                    if (!mSessionManager.hasActiveSessions()) {
+                        stopSelf();
+                        Log.w(TAG, "self destructing, no sessions active and nothing to do.");
                     }
                 }, 1000);
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
                 break;
         }
     }

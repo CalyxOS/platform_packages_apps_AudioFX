@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.backends;
 
 import android.media.AudioDeviceInfo;
@@ -73,21 +64,13 @@ public abstract class EffectSet {
     /**
      * Called when the user toggles the engine on or off. If the implementation has a built-in
      * bypass mode, this is where to use it.
-     *
-     * @param globalEnabled
      */
     public void setGlobalEnabled(boolean globalEnabled) {
         mGlobalEnabled = globalEnabled;
     }
 
-    public boolean isGlobalEnabled() {
-        return mGlobalEnabled;
-    }
-
     /**
      * Called when the output device has changed. All cached data should be cleared at this point.
-     *
-     * @param deviceInfo
      */
     public void setDevice(AudioDeviceInfo deviceInfo) {
         mDeviceInfo = deviceInfo;
@@ -138,14 +121,6 @@ public abstract class EffectSet {
     public abstract boolean hasBassBoost();
 
     // optional effects
-    public boolean hasTrebleBoost() {
-        return false;
-    }
-
-    public boolean hasVolumeBoost() {
-        return false;
-    }
-
     public boolean hasReverb() {
         return false;
     }
@@ -160,7 +135,6 @@ public abstract class EffectSet {
     public abstract short getNumEqualizerBands();
 
     /**
-     * @param band
      * @param level in millibels
      */
     public abstract void setEqualizerBandLevel(short band, float level);
@@ -179,7 +153,6 @@ public abstract class EffectSet {
     public abstract short[] getEqualizerBandLevelRange();
 
     /**
-     * @param band
      * @return center frequency of the band in millihertz
      */
     public abstract int getCenterFrequency(short band);
@@ -199,26 +172,9 @@ public abstract class EffectSet {
     public abstract void setVirtualizerStrength(short strength);
 
     public void enableReverb(boolean enable) {
-        return;
     }
 
     public void setReverbPreset(short preset) {
-        return;
-    }
-
-    public void enableTrebleBoost(boolean enable) {
-        return;
-    }
-
-    /**
-     * @param strength with range [0-100]
-     */
-    public void setTrebleBoostStrength(short strength) {
-        return;
-    }
-
-    public void enableVolumeBoost(boolean enable) {
-        return;
     }
 
     /**

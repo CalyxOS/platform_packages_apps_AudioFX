@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.service;
 
 import static android.media.AudioDeviceInfo.convertDeviceTypeToInternalDevice;
@@ -39,8 +30,7 @@ public class AudioOutputChangeListener extends AudioDeviceCallback {
     private final Handler mHandler;
     private int mLastDevice = -1;
 
-    private final ArrayList<AudioOutputChangedCallback> mCallbacks =
-            new ArrayList<AudioOutputChangedCallback>();
+    private final ArrayList<AudioOutputChangedCallback> mCallbacks = new ArrayList<>();
 
     public interface AudioOutputChangedCallback {
         void onAudioOutputChanged(boolean firstChange, AudioDeviceInfo outputDevice);
@@ -87,13 +77,10 @@ public class AudioOutputChangeListener extends AudioDeviceCallback {
                         " address: " + device.getAddress() +
                         " [" + device + "]");
                 mLastDevice = device.getId();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (mCallbacks) {
-                            for (AudioOutputChangedCallback callback : mCallbacks) {
-                                callback.onAudioOutputChanged(mInitial, device);
-                            }
+                mHandler.post(() -> {
+                    synchronized (mCallbacks) {
+                        for (AudioOutputChangedCallback callback : mCallbacks) {
+                            callback.onAudioOutputChanged(mInitial, device);
                         }
                     }
                 });
@@ -103,10 +90,6 @@ public class AudioOutputChangeListener extends AudioDeviceCallback {
                 }
             }
         }
-    }
-
-    public void refresh() {
-        callback();
     }
 
     @Override
@@ -120,7 +103,7 @@ public class AudioOutputChangeListener extends AudioDeviceCallback {
     }
 
     public List<AudioDeviceInfo> getConnectedOutputs() {
-        final List<AudioDeviceInfo> outputs = new ArrayList<AudioDeviceInfo>();
+        final List<AudioDeviceInfo> outputs = new ArrayList<>();
         final int forMusic = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
         for (AudioDeviceInfo ai : mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
             if ((convertDeviceTypeToInternalDevice(ai.getType()) & forMusic) > 0) {
@@ -133,14 +116,5 @@ public class AudioOutputChangeListener extends AudioDeviceCallback {
     public AudioDeviceInfo getCurrentDevice() {
         final List<AudioDeviceInfo> devices = getConnectedOutputs();
         return devices.size() > 0 ? devices.get(0) : null;
-    }
-
-    public AudioDeviceInfo getDeviceById(int id) {
-        for (AudioDeviceInfo ai : mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
-            if (ai.getId() == id) {
-                return ai;
-            }
-        }
-        return null;
     }
 }

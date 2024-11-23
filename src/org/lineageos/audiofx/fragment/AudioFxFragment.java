@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.fragment;
 
 import android.animation.Animator;
@@ -22,12 +13,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioDeviceInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,7 +49,6 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
     public static final String TAG_EQUALIZER = "equalizer";
     public static final String TAG_CONTROLS = "controls";
 
-    Handler mHandler;
     int mCurrentBackgroundColor;
 
     // whether we are in the middle of animating while switching devices
@@ -102,7 +90,6 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
             mSystemDevice = mConfig.getDeviceById(system);
         }
 
-        mHandler = new Handler();
         mDisabledColor = getResources().getColor(R.color.disabled_eq);
 
         setHasOptionsMenu(true);
@@ -186,23 +173,15 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.snack_bar_not_default)
                     .setNegativeButton(R.string.snack_bar_not_default_not_now,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getActivity().finish();
-                                }
-                            })
+                            (dialog, which) -> getActivity().finish())
                     .setPositiveButton(R.string.snack_bar_not_default_set,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent updateIntent = new Intent(getActivity(),
-                                            Compatibility.Service.class);
-                                    updateIntent.putExtra("defPackage", audioFxPackageName);
-                                    updateIntent.putExtra("defName", ActivityMusic.class.getName());
-                                    getActivity().startService(updateIntent);
-                                    dialog.dismiss();
-                                }
+                            (dialog, which) -> {
+                                Intent updateIntent = new Intent(getActivity(),
+                                        Compatibility.Service.class);
+                                updateIntent.putExtra("defPackage", audioFxPackageName);
+                                updateIntent.putExtra("defName", ActivityMusic.class.getName());
+                                getActivity().startService(updateIntent);
+                                dialog.dismiss();
                             })
                     .setCancelable(false)
                     .create()
@@ -348,12 +327,7 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
             }
             mSystemDevice = mConfig.getSystemDevice();
             mUserSelection = device;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mConfig.setCurrentDevice(mUserSelection, true);
-                }
-            });
+            getActivity().runOnUiThread(() -> mConfig.setCurrentDevice(mUserSelection, true));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -368,9 +342,7 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
             return null;
         }
 
-        View root = inflater.inflate(mConfig.hasMaxxAudio()
-                ? R.layout.fragment_audiofx_maxxaudio
-                : R.layout.fragment_audiofx, container, false);
+        View root = inflater.inflate(R.layout.fragment_audiofx, container, false);
 
         final FragmentTransaction fragmentTransaction = getChildFragmentManager()
                 .beginTransaction();

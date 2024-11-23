@@ -1,23 +1,13 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.fragment;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.media.AudioDeviceInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,9 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.Switch;
 
 import androidx.annotation.Nullable;
+
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import org.lineageos.audiofx.R;
 import org.lineageos.audiofx.activity.MasterConfigControl;
@@ -41,28 +32,10 @@ public class ControlsFragment extends AudioFxBaseFragment {
 
     KnobCommander mKnobCommander;
     KnobContainer mKnobContainer;
-    Switch mMaxxVolumeSwitch;
-    Switch mReverbSwitch;
-
-    private final CompoundButton.OnCheckedChangeListener mMaxxVolumeListener
-            = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if (mConfig.getMaxxVolumeEnabled() != isChecked) {
-            }
-            mConfig.setMaxxVolumeEnabled(isChecked);
-        }
-    };
+    MaterialSwitch mReverbSwitch;
 
     private final CompoundButton.OnCheckedChangeListener mReverbListener
-            = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if (mConfig.getReverbEnabled() != isChecked) {
-            }
-            mConfig.setReverbEnabled(isChecked);
-        }
-    };
+            = (buttonView, isChecked) -> mConfig.setReverbEnabled(isChecked);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,9 +63,6 @@ public class ControlsFragment extends AudioFxBaseFragment {
         if (mKnobContainer != null) {
             mKnobContainer.updateKnobHighlights(color);
         }
-        if (mMaxxVolumeSwitch != null) {
-            updateSwitchColor(mMaxxVolumeSwitch, color);
-        }
         if (mReverbSwitch != null) {
             updateSwitchColor(mReverbSwitch, color);
         }
@@ -107,31 +77,13 @@ public class ControlsFragment extends AudioFxBaseFragment {
             Log.d(TAG, "updating with current device: " + device.getType());
         }
 
-        if (mMaxxVolumeSwitch != null) {
-            mMaxxVolumeSwitch.setChecked(mConfig.getMaxxVolumeEnabled());
-            mMaxxVolumeSwitch.setEnabled(currentDeviceEnabled);
-        }
-
         if (mReverbSwitch != null) {
             mReverbSwitch.setChecked(mConfig.getReverbEnabled());
             mReverbSwitch.setEnabled(currentDeviceEnabled);
         }
     }
 
-    private void updateSwitchColor(Switch view, int color) {
-        ColorStateList thumbStates = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_enabled},
-                        new int[]{android.R.attr.state_checked},
-                        new int[]{}
-                },
-                new int[]{
-                        color,
-                        color,
-                        Color.LTGRAY
-                }
-        );
-
+    private void updateSwitchColor(MaterialSwitch view, int color) {
         ColorStateList trackStates = new ColorStateList(
                 new int[][]{
                         new int[]{-android.R.attr.state_enabled},
@@ -145,18 +97,14 @@ public class ControlsFragment extends AudioFxBaseFragment {
                 }
         );
 
-        view.setThumbTintList(thumbStates);
         view.setTrackTintList(trackStates);
-        view.setTrackTintMode(PorterDuff.Mode.OVERLAY);
         view.invalidate();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        View root = inflater.inflate(mConfig.hasMaxxAudio() ? R.layout.controls_maxx_audio
-                : R.layout.controls_generic, container, false);
-        return root;
+        return inflater.inflate(R.layout.controls_generic, container, false);
     }
 
     @Override
@@ -164,14 +112,10 @@ public class ControlsFragment extends AudioFxBaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mKnobContainer = view.findViewById(R.id.knob_container);
-        mMaxxVolumeSwitch = view.findViewById(R.id.maxx_volume_switch);
         mReverbSwitch = view.findViewById(R.id.reverb_switch);
 
         updateFragmentBackgroundColors(getCurrentBackgroundColor());
 
-        if (mMaxxVolumeSwitch != null) {
-            mMaxxVolumeSwitch.setOnCheckedChangeListener(mMaxxVolumeListener);
-        }
         if (mReverbSwitch != null) {
             mReverbSwitch.setOnCheckedChangeListener(mReverbListener);
         }

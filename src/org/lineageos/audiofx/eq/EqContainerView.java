@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.eq;
 
 import android.content.Context;
@@ -23,20 +14,19 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
 
 import org.lineageos.audiofx.R;
 import org.lineageos.audiofx.activity.EqualizerManager;
@@ -80,8 +70,6 @@ public class EqContainerView extends FrameLayout
     private Paint mSelectedFreqPaint;
     private Paint mCenterLinePaint;
     private Path mDashPath;
-
-    private Handler mHandler;
 
     private Context mContext;
     private final Runnable mVibrateRunnable = new Runnable() {
@@ -145,8 +133,6 @@ public class EqContainerView extends FrameLayout
     private void init() {
         setLayerType(LAYER_TYPE_HARDWARE, null);
 
-        mHandler = new Handler();
-
         final Resources r = getResources();
 
         mBarWidth = r.getDimensionPixelSize(R.dimen.eq_bar_width);
@@ -170,7 +156,7 @@ public class EqContainerView extends FrameLayout
 
         setWillNotDraw(false);
 
-        mSelectedBandColor = r.getColor(R.color.band_bar_color_selected);
+        mSelectedBandColor = r.getColor(R.color.band_bar_color_selected, mContext.getTheme());
 
         mTextPaint = new Paint();
         mTextPaint.setAntiAlias(true);
@@ -196,13 +182,7 @@ public class EqContainerView extends FrameLayout
         mCenterLinePaint.setStyle(Paint.Style.STROKE);
         mCenterLinePaint.setAntiAlias(true);
 
-        getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        generateAndAddBars();
-                    }
-                });
+        getViewTreeObserver().addOnGlobalLayoutListener(this::generateAndAddBars);
     }
 
     @Override
@@ -258,25 +238,22 @@ public class EqContainerView extends FrameLayout
                 final EqBarView bar = new EqBarView(mContext);
                 band.mBar = bar;
                 bar.setTag(band);
-                bar.setOnTouchListener(new OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        if (mEqManager.isEqualizerLocked()) {
-                            return false;
-                        }
-                        switch (event.getActionMasked()) {
-
-                            case MotionEvent.ACTION_DOWN:
-                                startBarInteraction(bar);
-                                break;
-                            case MotionEvent.ACTION_CANCEL:
-                            case MotionEvent.ACTION_UP:
-                                stopBarInteraction(bar);
-                                break;
-                        }
-
+                bar.setOnTouchListener((v, event) -> {
+                    if (mEqManager.isEqualizerLocked()) {
                         return false;
                     }
+                    switch (event.getActionMasked()) {
+
+                        case MotionEvent.ACTION_DOWN:
+                            startBarInteraction(bar);
+                            break;
+                        case MotionEvent.ACTION_CANCEL:
+                        case MotionEvent.ACTION_UP:
+                            stopBarInteraction(bar);
+                            break;
+                    }
+
+                    return false;
                 });
 
                 // set correct initial alpha
@@ -286,16 +263,13 @@ public class EqContainerView extends FrameLayout
                     bar.setAlpha(0.8f);
                 }
                 bar.setBackgroundColor(Color.WHITE);
-                bar.setElevation(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2,
-                        getResources().getDisplayMetrics()));
 
                 addView(bar, getFrameParams(i));
                 bar.setParentHeight(mHeight, getTop());
 
                 final float freq = mEqManager.getCenterFreq(i);
-                String frequencyText = String.format(freq < 1000 ? "%.0f" : "%.0fk",
-                        freq < 1000 ? freq : freq / 1000);
-                band.mFreq = frequencyText;
+                band.mFreq = String.format(freq < 1000 ? "%.0f" : "%.0fk",
+                        freq < 1000 ? freq : freq / 1000);;
                 mBarViews.add(bar);
             }
             updateSelectedBands();
@@ -395,8 +369,8 @@ public class EqContainerView extends FrameLayout
         if (changed || mDashPath == null) {
             mDashPath = new Path();
             mDashPath.reset();
-            mDashPath.moveTo(freeSpace / 2, dashY);
-            mDashPath.lineTo(widthOfBars + (freeSpace / 2), dashY);
+            mDashPath.moveTo(freeSpace / 2f, dashY);
+            mDashPath.lineTo(widthOfBars + (freeSpace / 2f), dashY);
         }
 
         mControls.layout(
@@ -410,7 +384,7 @@ public class EqContainerView extends FrameLayout
 
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         canvas.drawPath(mDashPath, mCenterLinePaint);
@@ -418,7 +392,7 @@ public class EqContainerView extends FrameLayout
         for (int i = 0; i < mBandInfo.size(); i++) {
             EqBandInfo info = mBandInfo.get(i);
 
-            final float x = info.mBar.getX() + (info.mBar.getWidth() / 2);
+            final float x = info.mBar.getX() + (info.mBar.getWidth() / 2f);
             final boolean userInteracting = info.mBar.isUserInteracting();
             if (userInteracting) {
                 canvas.drawText(
@@ -512,12 +486,7 @@ public class EqContainerView extends FrameLayout
             v.animate()
                     .alpha(0f)
                     .setDuration(350)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            v.setVisibility(View.INVISIBLE);
-                        }
-                    });
+                    .withEndAction(() -> v.setVisibility(View.INVISIBLE));
         }
     }
 

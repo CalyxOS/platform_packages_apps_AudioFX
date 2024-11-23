@@ -1,18 +1,9 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: 2016 The CyanogenMod Project
+ * SPDX-FileCopyrightText: 2017-2024 The LineageOS Project
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 package org.lineageos.audiofx.activity;
 
 import android.app.ActionBar;
@@ -27,7 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.CompoundButton;
-import android.widget.Switch;
+
+import androidx.annotation.NonNull;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import org.lineageos.audiofx.Constants;
 import org.lineageos.audiofx.R;
@@ -43,7 +40,7 @@ public class ActivityMusic extends Activity {
     public static final String TAG_AUDIOFX = "audiofx";
     public static final String EXTRA_CALLING_PACKAGE = "audiofx::extra_calling_package";
 
-    private Switch mCurrentDeviceToggle;
+    private MaterialSwitch mCurrentDeviceToggle;
     MasterConfigControl mConfig;
     String mCallingPackage;
 
@@ -67,6 +64,18 @@ public class ActivityMusic extends Activity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_fragment),
+                (view, insets) -> {
+            Insets systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(
+                    view.getPaddingLeft(),
+                    systemInsets.top,
+                    view.getPaddingRight(),
+                    systemInsets.bottom
+            );
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         mCallingPackage = getIntent().getStringExtra(EXTRA_CALLING_PACKAGE);
         Log.i(TAG, "calling package: " + mCallingPackage);
@@ -137,7 +146,7 @@ public class ActivityMusic extends Activity {
         final View extraView = LayoutInflater.from(this)
                 .inflate(R.layout.action_bar_custom_components, null);
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.END | Gravity.CENTER_VERTICAL);
         ab.setCustomView(extraView, lp);
         ab.setDisplayShowCustomEnabled(true);
 
@@ -150,22 +159,10 @@ public class ActivityMusic extends Activity {
                     .add(R.id.main_fragment, new AudioFxFragment(), TAG_AUDIOFX)
                     .commit();
         }
-        applyOemDecor();
-    }
-
-    private void applyOemDecor() {
-        ActionBar ab = getActionBar();
-        if (mConfig.hasMaxxAudio()) {
-            ab.setSubtitle(R.string.powered_by_maxx_audio);
-        } else if (mConfig.hasDts()) {
-            final ViewStub stub = ab.getCustomView().findViewById(R.id.logo_stub);
-            stub.setLayoutResource(R.layout.action_bar_dts_logo);
-            stub.inflate();
-        }
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (DEBUG) {
             Log.i(TAG, "onConfigurationChanged() called with "
